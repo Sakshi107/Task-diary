@@ -13,7 +13,7 @@ def initialize_db(password):
     try:
         conn = psycopg2.connect(database="task_manager",
                                 user="postgres",
-                                password="passworsd",#password of postgresql
+                                password="Sakshi#123",#password of postgresql
                                 host="127.0.0.1",
                                 port="5432")
 
@@ -47,7 +47,7 @@ def get_tasks():
 
 def edit_task(id, values):
     cursor = conn.cursor()
-    cursor.execute("UPDATE tasks SET task_name = %s, priority_of_task = %s, category = %s, is_done = %s ,deadline=%s, WHERE id = %s;",
+    cursor.execute("UPDATE tasks SET task_name = %s, priority_of_task = %s, category = %s, is_done = %s ,deadline=%s WHERE id = %s;",
                    (values[0], values[1], values[2], values[3],values[4], id))
 
     conn.commit()
