@@ -25,6 +25,7 @@ if password is None:
 db.initialize_db(password)
 
 root = ttkt.ThemedTk()
+root.set_theme('radiance')
 root.title("Task Manager")
 columns = ("task_name", "priority_of_task", "category", "is_done","deadline")
 tree = ttk.Treeview(root, height=36, selectmode="browse", columns=columns, show="headings")
@@ -50,15 +51,15 @@ for column in columns:
 width, height = root.winfo_screenwidth(), root.winfo_screenheight()
 root.geometry("{0}x{1}+0+0".format(width, height))
 
-width_task_name = int(width * 0.26)
+width_task_name = int(width * 0.25)
 tree.column("task_name", width=width_task_name, anchor="center")
 tree.heading("task_name", text="task_name")
 
-width_priority_of_task = int(width * 0.06)
+width_priority_of_task = int(width * 0.08)
 tree.column("priority_of_task", width=width_priority_of_task, anchor="center")
-tree.heading("priority_of_task", text="priority_of_task")
+tree.heading("priority_of_task", text="Priority")
 
-width_category = int(width * 0.21)
+width_category = int(width * 0.15)
 tree.column("category", width=width_category, anchor="center")
 tree.heading("category", text="Category")
 
@@ -70,34 +71,34 @@ width_deadline = int(width * 0.11)
 tree.column("deadline", width=width_is_done, anchor="center")
 tree.heading("deadline", text="deadline")
 
-right_frame = ttk.Frame(root, padding="25 25 100 50")
-right_frame.grid(row=0, column=2, sticky=(N, S, W, E))
-right_frame.rowconfigure(0, weight=1)
-right_frame.columnconfigure(0, weight=1)
+mainframe = ttk.Frame(root, padding="25 25 100 50")
+mainframe.grid(row=0, column=2, sticky=(N, S, W, E))
+mainframe.rowconfigure(0, weight=1)
+mainframe.columnconfigure(0, weight=1)
 
 task_name = StringVar()
-ttk.Label(right_frame, text="task_name:").grid(column=1, row=1, sticky=(W, E))
-task_name_widget = ttk.Entry(right_frame, width=20, textvariable=task_name)
+ttk.Label(mainframe, text="Task name:").grid(column=1, row=1, sticky=(W, E))
+task_name_widget = ttk.Entry(mainframe, width=20, textvariable=task_name)
 task_name_widget.grid(column=2, row=1, sticky=(W, E))
 
 priority_of_task = StringVar()
-ttk.Label(right_frame, text="priority_of_task(E.g 1 to 10):").grid(column=1, row=2, sticky=(W, E))
-priority_of_task_widget = ttk.Entry(right_frame, width=20, textvariable=priority_of_task)
+ttk.Label(mainframe, text="priority of task \n(E.g 1 to 10):").grid(column=1, row=2, sticky=(W, E))
+priority_of_task_widget = ttk.Entry(mainframe, width=20, textvariable=priority_of_task)
 priority_of_task_widget.grid(column=2, row=2, sticky=(W, E))
 
 category = StringVar()
-ttk.Label(right_frame, text="Category:").grid(column=1, row=3, sticky=(W, E))
-category_widget = ttk.Entry(right_frame, width=20, textvariable=category)
+ttk.Label(mainframe, text="Category:").grid(column=1, row=3, sticky=(W, E))
+category_widget = ttk.Entry(mainframe, width=20, textvariable=category)
 category_widget.grid(column=2, row=3, sticky=(W, E))
 
 deadline = StringVar()
-ttk.Label(right_frame, text="Deadline:").grid(column=1, row=4, sticky=(W, E))
-deadline_widget = ttk.Entry(right_frame, width=20, textvariable=deadline)
+ttk.Label(mainframe, text="Deadline:").grid(column=1, row=4, sticky=(W, E))
+deadline_widget = ttk.Entry(mainframe, width=20, textvariable=deadline)
 deadline_widget.grid(column=2, row=4, sticky=(W, E))
 
 is_done = BooleanVar()
-ttk.Label(right_frame, text="Is Done:").grid(column=1, row=5, sticky=(W, E))
-is_done_widget = ttk.Checkbutton(right_frame, variable=is_done,
+ttk.Label(mainframe, text="Is Done:").grid(column=1, row=5, sticky=(W, E))
+is_done_widget = ttk.Checkbutton(mainframe, variable=is_done,
                                      onvalue=True, offvalue=False)
 is_done_widget.grid(column=2, row=5, sticky=(W, E))
 
@@ -150,29 +151,33 @@ def inputs_validation():
     return True
 
 
-create_button = ttk.Button(right_frame, text="Create Task", command=create_task_item)
+create_button = ttk.Button(mainframe, text="Create Task", command=create_task_item)
 create_button.grid(column=1, row=6, sticky=(W, E))
 
-
+z=0
 def change_theme():
+    global z
     themes=root.get_themes()
-    print(len(themes))
-    root.set_theme(random.choice(themes))
+    length=int(len(themes))
+    while(True):
+        z=z%length
+        root.set_theme(themes[z])
+        z+=1
+        break
 
 
-changeTheme_button = ttk.Button(right_frame, text="Change Theme", command=change_theme)
+changeTheme_button = ttk.Button(mainframe, text="Change Theme", command=change_theme)
 changeTheme_button.grid(column=1, row=7, sticky=(W, E))
 
 top = tk.Toplevel(root)
 cal = Calendar(top, selectmode='none')
 date = cal.datetime.today()
 cal.calevent_create(date, 'Today', 'message')
-def calendar_events():
+def calendar_events():    
     for item in db.get_tasks():
         dd=datetime.strptime(item[5], "%Y-%m-%d")
         cal.calevent_create(dd,item[1], 'reminder')
     cal.tag_config('reminder', background='red', foreground='yellow')
-
     cal.pack(fill="both", expand=True)
 
 class ToolTip(object):
@@ -217,12 +222,9 @@ def CreateToolTip(widget, text):
 button = Button(top, text = 'Hover over me')
 button.pack()
 CreateToolTip(button, text = 'Hello you!\n'
-                 'Have a nice day\n')
-
-
-cal_events_btn=ttk.Button(right_frame, text='calendar with events', command=calendar_events)
+                'Have a nice day\n')    
+cal_events_btn=ttk.Button(mainframe, text='calendar with events', command=calendar_events)
 cal_events_btn.grid(column=1, row=8, sticky=(W, E))
-
 
 def change_item():
     task_name_value = task_name.get()
@@ -232,6 +234,7 @@ def change_item():
     deadline_value=deadline.get()
 
     if inputs_validation():
+        item_id = tree.item(tree.selection()[0], "text")
         item_values = (task_name_value,
                        priority_of_task_value,
                        category_value,
@@ -244,7 +247,6 @@ def change_item():
         task_name.set("")
         priority_of_task.set("")
         category.set("")
-        category.set("")
         deadline.set("")
         is_done.set(False)
 
@@ -252,11 +254,11 @@ def change_item():
         change_button["state"] = "disabled"
 
 
-change_button = ttk.Button(right_frame, text="Change Task", command=change_item)
+change_button = ttk.Button(mainframe, text="Change Task", command=change_item)
 change_button.grid(column=2, row=6, sticky=(W, E))
 change_button["state"] = "disabled"
 
-for child in right_frame.winfo_children():
+for child in mainframe.winfo_children():
     child.grid_configure(padx=25, pady=25)
 
 for item in db.get_tasks():
