@@ -1,7 +1,3 @@
-"""
-File: db.py.
-"""
-
 import sys
 import psycopg2
 conn = None
@@ -12,8 +8,8 @@ def initialize_db(password):
 
     try:
         conn = psycopg2.connect(database="task_manager",
-                                user="postgres",
-                                password="Sakshi#123",#password of postgresql
+                                user="postgres",#username of postgreSQL
+                                password="password",#password of that user in postgreSQL
                                 host="127.0.0.1",
                                 port="5432")
 
@@ -60,4 +56,8 @@ def delete_task(id):
     conn.commit()
     print("Number of records deleted:", cursor.rowcount)
 
-
+def read_from_db(var):
+    cursor = conn.cursor()
+    cursor.execute("SELECT task_name, priority_of_task, category, is_done,deadline from tasks where task_name=%s;", (var, ))
+    rows = cursor.fetchall()
+    return rows
