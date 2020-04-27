@@ -116,7 +116,6 @@ def delete_task(id):
 
 def read_from_db(var):
     cursor = conn.cursor()
-    cursor.execute("SELECT task_name, priority_of_task, category, is_done,deadline from tasks where task_name=%s;", (var, ))
+    cursor.execute("SELECT category,task_name, deadline from tasks where task_name=%s OR category=%s OR deadline=%s;", (var,var,var ))
     rows = cursor.fetchall()
     return rows
-

@@ -63,9 +63,9 @@ def notify():
 
 
 def email_notify(item):
-    email = 'hiraljsheth72@gmail.com'#add your gmail id from which u want to sent (only gmail account)
+    email = 'abc@gmail.com'#add your gmail id from which u want to sent (only gmail account)
     password = 'password'#add your email password
-    send_to_email = 'hiral.sheth@somaiya.edu'#add your email id where u want to sent (any mail account)
+    send_to_email = 'xyz@gmail.com'#add your email id where u want to sent (any mail account)
     subject = 'Task Notifier'# The subject line
     message ='Category of task: '+item[3]+'\n\nYour Task:'+ item[1]
     msg = MIMEMultipart()
@@ -227,7 +227,6 @@ def change_theme():
         z=z%length
         root.set_theme(themes[z])
         cal.tag_config('reminder', background='red', foreground='yellow')
-        cal.pack(fill="both", expand=True)
         z+=1
         break
 
@@ -238,9 +237,11 @@ changeTheme_button.grid(column=1, row=7, sticky=(W, E))
 
 
 top = tk.Toplevel(root)
+cal = Calendar(top, selectmode='none')  
+date = cal.datetime.today()
+cal.calevent_create(date, 'Today', 'message')
+cal.pack(fill="both", expand=True)
 def calendar_events():  
-    global top
-    global cal
     top = tk.Toplevel(root)
     cal = Calendar(top, selectmode='none')  
     for item in db.get_tasks():
@@ -251,54 +252,51 @@ def calendar_events():
     date = cal.datetime.today()
     cal.calevent_create(date, 'Today', 'message')
 
-class ToolTip(object):
+# class ToolTip(object):
 
-    def __init__(self, widget):
-        self.widget = widget
-        self.tipwindow = None
-        self.id = None
-        self.x = self.y = 0
+#     def __init__(self, widget):
+#         self.widget = widget
+#         self.tipwindow = None
+#         self.id = None
+#         self.x = self.y = 0
 
-    def showtip(self, text):
-        "Display text in tooltip window"
-        self.text = text
-        if self.tipwindow or not self.text:
-            return
-        x, y, cx, cy = self.widget.bbox("insert")
-        x = x + self.widget.winfo_rootx() + 57
-        y = y + cy + self.widget.winfo_rooty() +27
-        self.tipwindow = tw = Toplevel(self.widget)
-        tw.wm_overrideredirect(1)
-        tw.wm_geometry("+%d+%d" % (x, y))
-        label = Label(tw, text=self.text, justify=LEFT,
-                      background="#ffffe0", relief=SOLID, borderwidth=1,
-                      font=("tahoma", "8", "normal"))
-        label.pack(ipadx=1)
+#     def showtip(self, text):
+#         "Display text in tooltip window"
+#         self.text = text
+#         if self.tipwindow or not self.text:
+#             return
+#         x, y, cx, cy = self.widget.bbox("insert")
+#         x = x + self.widget.winfo_rootx() + 57
+#         y = y + cy + self.widget.winfo_rooty() +27
+#         self.tipwindow = tw = Toplevel(self.widget)
+#         tw.wm_overrideredirect(1)
+#         tw.wm_geometry("+%d+%d" % (x, y))
+#         label = Label(tw, text=self.text, justify=LEFT,
+#                       background="#ffffe0", relief=SOLID, borderwidth=1,
+#                       font=("tahoma", "8", "normal"))
+#         label.pack(ipadx=1)
 
-    def hidetip(self):
-        tw = self.tipwindow
-        self.tipwindow = None
-        if tw:
-            tw.destroy()
+#     def hidetip(self):
+#         tw = self.tipwindow
+#         self.tipwindow = None
+#         if tw:
+#             tw.destroy()
 
-def CreateToolTip(widget, text):
-    toolTip = ToolTip(widget)
-    def enter(event):
-        toolTip.showtip(text)
-    def leave(event):
-        toolTip.hidetip()
-    widget.bind('<Enter>', enter)
-    widget.bind('<Leave>', leave)
+# def CreateToolTip(widget, text):
+#     toolTip = ToolTip(widget)
+#     def enter(event):
+#         toolTip.showtip(text)
+#     def leave(event):
+#         toolTip.hidetip()
+#     widget.bind('<Enter>', enter)
+#     widget.bind('<Leave>', leave)
 
-button = Button(top, text = 'Hover over me')
-button.pack()
-CreateToolTip(button, text = 'Hello you!\n'
-                'Have a nice day\n')    
+# button = Button(top, text = 'Hover over me')
+# button.pack()
+# CreateToolTip(button, text = 'Hello you!\n'
+#                 'Have a nice day\n')    
 cal_events_btn=ttk.Button(mainframe, text='calendar with events', command=calendar_events)
 cal_events_btn.grid(column=1, row=8, sticky=(W, E))
-
-
-
 
 
 
@@ -308,47 +306,34 @@ search_task = StringVar()
 search_task_widget = ttk.Entry(mainframe, width=20, textvariable=search_task)
 search_task_widget.grid(column=2, row=9, sticky=(W, E))
 
-def Search_task():
+def show():
     global data
     search_task_value= search_task.get()
-    print(search_task_value)
     data=db.read_from_db(search_task_value)
-    print(data)
+    data.sort(key=lambda e: e[1], reverse=True)
+    if(len(data)==0):
+       textMsg="Search Result(Task not found)"
+    else:
+        textMsg="Search Result"
+    search_result = tk.Toplevel(root)
+    tk.Label(search_result, text=textMsg, font=("Arial",27)).grid(row=0, columnspan=3)
+    # create Treeview with 3 columns
+    cols = ('Sr no.','Category', 'Task', 'Due date')
+    listBox = ttk.Treeview(search_result, columns=cols, show='headings')
+    # set column headings
+    for col in cols:
+        listBox.heading(col, text=col)    
+    listBox.grid(row=1, column=0, columnspan=2)
+    for i, (category,task_name,deadline) in enumerate(data, start=1):
+        listBox.insert("", "end", values=(i,category,task_name,deadline))
+    tk.Button(search_result, text="Close", width=15, command=search_result.destroy).grid(row=4, column=1)
 
-    root1 = tk.Tk()
-    root1.geometry("600x200")  
-    edit = tk.Text(root1)
-    edit.pack()
-    for i in range(len(data)):
-        myword1 = data[i][0]
-        myword2 = data[i][4]
-        # create a list of unique tags
-        tags = ["tg" + str(k) for k in range(len(data[i]))]
-        for ix, word in enumerate(data[i]):
-            if word[:len(myword1)] == myword1:
-                color_text(edit, tags[ix], word, 'blue')
-            elif word[:len(myword2)] == myword2:
-                color_text(edit, tags[ix], word, 'red', 'white')
-            else:
-                color_text(edit, tags[ix], word)
 
-    
-
-Search_btn=ttk.Button(mainframe, text='Search', command=Search_task)
+Search_btn=ttk.Button(mainframe, text='Search', command=show)
 Search_btn.grid(column=1, row=9, sticky=(W, E))
 
-def color_text(edit, tag, word, fg_color='black', bg_color='white'):
-    # add a space to the end of the word
-    word = word + " "
-    edit.insert('end', word)
-    end_index = edit.index('end')
-    begin_index = "%s-%sc" % (end_index, len(word)+1)
-    edit.tag_add(tag, begin_index, end_index)
-    edit.tag_config(tag, foreground=fg_color, background=bg_color)
- 
- 
 
- 
+
 
 def change_item():
     task_name_value = task_name.get()
