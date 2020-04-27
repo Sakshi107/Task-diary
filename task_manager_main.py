@@ -5,14 +5,20 @@ from tkinter import messagebox
 from tkinter import simpledialog
 from ttkthemes import themed_tk as ttkt
 import random
-
 from datetime import datetime
+from datetime import timedelta
+from datetime import date
 from dateutil.parser import parse
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 import tkcalendar
 from tkcalendar import Calendar, DateEntry
 
 import db
+
 
 password_root = Tk()
 password_root.withdraw()
@@ -23,6 +29,9 @@ if password is None:
     sys.exit()
 
 db.initialize_db(password)
+db.create_table()
+db.create_table2()
+
 
 root = ttkt.ThemedTk()
 root.set_theme('radiance')
@@ -33,6 +42,48 @@ scrollbar = ttk.Scrollbar(root, orient=VERTICAL, command=tree.yview)
 tree.configure(yscrollcommand=scrollbar.set)
 tree.grid(row=0, column=0, rowspan=2)
 scrollbar.grid(row=0, column=1, rowspan=2, sticky=(W, N, E, S))
+
+def already_notified(taskn):
+    for item in db.get_notified_tasks():
+        if taskn[0]==item[0]:
+            return True
+    return False
+
+def notify():
+    for item in db.get_tasks():
+        if not already_notified(item):
+            dd=datetime.strptime(item[5], "%d-%m-%Y")
+            dd2= dd -timedelta(days=1)
+            dd3=dd2.strftime('%d-%m-%Y')
+            today=datetime.today().strftime('%d-%m-%Y')
+            if (dd3==today) and (item[4]=="false"):
+                email_notify(item)
+                db.add_notify_date(item)
+                print("Email notification sent sucessfully")
+
+
+def email_notify(item):
+    email = 'hiraljsheth72@gmail.com'#add your gmail id from which u want to sent (only gmail account)
+    password = 'password'#add your email password
+    send_to_email = 'hiral.sheth@somaiya.edu'#add your email id where u want to sent (any mail account)
+    subject = 'Task Notifier'# The subject line
+    message ='Category of task: '+item[3]+'\n\nYour Task:'+ item[1]
+    msg = MIMEMultipart()
+    msg['From'] = email
+    msg['To'] = send_to_email
+    msg['Subject'] = subject
+
+    # Attach the message to the MIMEMultipart object
+    msg.attach(MIMEText(message, 'plain'))
+
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(email, password)
+    text = msg.as_string() # You now need to convert the MIMEMultipart object to a string to send
+    server.sendmail(email, send_to_email, text)
+    server.quit()
+
+
 
 
 def treeview_sort_column(treeview, column, reverse):
@@ -53,7 +104,7 @@ root.geometry("{0}x{1}+0+0".format(width, height))
 
 width_task_name = int(width * 0.25)
 tree.column("task_name", width=width_task_name, anchor="center")
-tree.heading("task_name", text="task_name")
+tree.heading("task_name", text="Tasks")
 
 width_priority_of_task = int(width * 0.08)
 tree.column("priority_of_task", width=width_priority_of_task, anchor="center")
@@ -69,7 +120,7 @@ tree.heading("is_done", text="Is Finished")
 
 width_deadline = int(width * 0.11)
 tree.column("deadline", width=width_is_done, anchor="center")
-tree.heading("deadline", text="deadline")
+tree.heading("deadline", text="Due date")
 
 mainframe = ttk.Frame(root, padding="25 25 100 50")
 mainframe.grid(row=0, column=2, sticky=(N, S, W, E))
@@ -82,7 +133,7 @@ task_name_widget = ttk.Entry(mainframe, width=20, textvariable=task_name)
 task_name_widget.grid(column=2, row=1, sticky=(W, E))
 
 priority_of_task = StringVar()
-ttk.Label(mainframe, text="priority of task \n(E.g 1 to 10):").grid(column=1, row=2, sticky=(W, E))
+ttk.Label(mainframe, text="Priority of task \n(E.g 1 to 10):").grid(column=1, row=2, sticky=(W, E))
 priority_of_task_widget = ttk.Entry(mainframe, width=20, textvariable=priority_of_task)
 priority_of_task_widget.grid(column=2, row=2, sticky=(W, E))
 
@@ -92,7 +143,7 @@ category_widget = ttk.Entry(mainframe, width=20, textvariable=category)
 category_widget.grid(column=2, row=3, sticky=(W, E))
 
 deadline = StringVar()
-ttk.Label(mainframe, text="Deadline:").grid(column=1, row=4, sticky=(W, E))
+ttk.Label(mainframe, text="Deadline: \n(Format:dd-mm-yyyy)").grid(column=1, row=4, sticky=(W, E))
 deadline_widget = ttk.Entry(mainframe, width=20, textvariable=deadline)
 deadline_widget.grid(column=2, row=4, sticky=(W, E))
 
@@ -103,6 +154,7 @@ is_done_widget = ttk.Checkbutton(mainframe, variable=is_done,
 is_done_widget.grid(column=2, row=5, sticky=(W, E))
 
 
+notify()
 
 def create_task_item():
     task_name_value = task_name.get()
@@ -134,18 +186,30 @@ def create_task_item():
 
         create_button["state"] = "normal"
         change_button["state"] = "disabled"
+        notify()
 
 
 def inputs_validation():
     task_name_value = task_name.get()
     priority_of_task_value = priority_of_task.get()
     category_value = category.get()
+    deadline_value=deadline.get()
+    dd=datetime.strptime(deadline_value,"%d-%m-%Y")
+    today=datetime.today().strftime('%d-%m-%Y')
+    today1=datetime.strptime(today,"%d-%m-%Y")
+
+
+
 
     if not(len(task_name_value) > 0 and len(task_name_value) <= 40):
         return False
     if not(int(priority_of_task_value) > 0 and int(priority_of_task_value) <= 10):
+        print("Priority is not valid")
         return False
     if not(len(category_value) > 0 and len(category_value) <= 20):
+        return False
+    if (dd<today1):
+        print("Deadline is gone.")#pop-up box to be added
         return False
 
     return True
@@ -173,63 +237,63 @@ changeTheme_button.grid(column=1, row=7, sticky=(W, E))
 
 
 
-# top = tk.Toplevel(root)
+top = tk.Toplevel(root)
 def calendar_events():  
     global top
     global cal
     top = tk.Toplevel(root)
     cal = Calendar(top, selectmode='none')  
     for item in db.get_tasks():
-        dd=datetime.strptime(item[5], "%Y-%m-%d")
+        dd=datetime.strptime(item[5], "%d-%m-%Y")
         cal.calevent_create(dd,item[1], 'reminder')
         cal.tag_config('reminder', background='red', foreground='yellow')
         cal.pack(fill="both", expand=True)
     date = cal.datetime.today()
     cal.calevent_create(date, 'Today', 'message')
 
-# class ToolTip(object):
+class ToolTip(object):
 
-#     def __init__(self, widget):
-#         self.widget = widget
-#         self.tipwindow = None
-#         self.id = None
-#         self.x = self.y = 0
+    def __init__(self, widget):
+        self.widget = widget
+        self.tipwindow = None
+        self.id = None
+        self.x = self.y = 0
 
-#     def showtip(self, text):
-#         "Display text in tooltip window"
-#         self.text = text
-#         if self.tipwindow or not self.text:
-#             return
-#         x, y, cx, cy = self.widget.bbox("insert")
-#         x = x + self.widget.winfo_rootx() + 57
-#         y = y + cy + self.widget.winfo_rooty() +27
-#         self.tipwindow = tw = Toplevel(self.widget)
-#         tw.wm_overrideredirect(1)
-#         tw.wm_geometry("+%d+%d" % (x, y))
-#         label = Label(tw, text=self.text, justify=LEFT,
-#                       background="#ffffe0", relief=SOLID, borderwidth=1,
-#                       font=("tahoma", "8", "normal"))
-#         label.pack(ipadx=1)
+    def showtip(self, text):
+        "Display text in tooltip window"
+        self.text = text
+        if self.tipwindow or not self.text:
+            return
+        x, y, cx, cy = self.widget.bbox("insert")
+        x = x + self.widget.winfo_rootx() + 57
+        y = y + cy + self.widget.winfo_rooty() +27
+        self.tipwindow = tw = Toplevel(self.widget)
+        tw.wm_overrideredirect(1)
+        tw.wm_geometry("+%d+%d" % (x, y))
+        label = Label(tw, text=self.text, justify=LEFT,
+                      background="#ffffe0", relief=SOLID, borderwidth=1,
+                      font=("tahoma", "8", "normal"))
+        label.pack(ipadx=1)
 
-#     def hidetip(self):
-#         tw = self.tipwindow
-#         self.tipwindow = None
-#         if tw:
-#             tw.destroy()
+    def hidetip(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()
 
-# def CreateToolTip(widget, text):
-#     toolTip = ToolTip(widget)
-#     def enter(event):
-#         toolTip.showtip(text)
-#     def leave(event):
-#         toolTip.hidetip()
-#     widget.bind('<Enter>', enter)
-#     widget.bind('<Leave>', leave)
+def CreateToolTip(widget, text):
+    toolTip = ToolTip(widget)
+    def enter(event):
+        toolTip.showtip(text)
+    def leave(event):
+        toolTip.hidetip()
+    widget.bind('<Enter>', enter)
+    widget.bind('<Leave>', leave)
 
-# button = Button(top, text = 'Hover over me')
-# button.pack()
-# CreateToolTip(button, text = 'Hello you!\n'
-#                 'Have a nice day\n')    
+button = Button(top, text = 'Hover over me')
+button.pack()
+CreateToolTip(button, text = 'Hello you!\n'
+                'Have a nice day\n')    
 cal_events_btn=ttk.Button(mainframe, text='calendar with events', command=calendar_events)
 cal_events_btn.grid(column=1, row=8, sticky=(W, E))
 
@@ -312,6 +376,7 @@ def change_item():
 
         create_button["state"] = "normal"
         change_button["state"] = "disabled"
+        notify()
 
 change_button = ttk.Button(mainframe, text="Change Task", command=change_item)
 change_button.grid(column=2, row=6, sticky=(W, E))
