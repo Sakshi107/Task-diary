@@ -63,9 +63,9 @@ def notify():
 
 
 def email_notify(item):
-    email = 'abc@gmail.com'#add your gmail id from which u want to sent (only gmail account)
-    password = 'password'#add your email password
-    send_to_email = 'xyz@gmail.com'#add your email id where u want to sent (any mail account)
+    email = 'task.diary534@gmail.com'#add your gmail id from which u want to sent (only gmail account)
+    password = 'task@diary'#add your email password
+    send_to_email = 'abc123@somaiya.edu'#add your email id where u want to sent (any mail account)
     subject = 'Task Notifier'# The subject line
     message ='Category of task: '+item[3]+'\n\nYour Task:'+ item[1]
     msg = MIMEMultipart()
@@ -201,17 +201,18 @@ def inputs_validation():
 
 
 
-    if not(len(task_name_value) > 0 and len(task_name_value) <= 40):
+    if not(len(task_name_value) > 0 and len(task_name_value) <=25):
+        messagebox.showerror("Task name", "Task name limit exceeded")
         return False
     if not(int(priority_of_task_value) > 0 and int(priority_of_task_value) <= 10):
-        print("Priority is not valid")
+        messagebox.showerror("Priority", "Priority is not valid")
         return False
-    if not(len(category_value) > 0 and len(category_value) <= 20):
+    if not(len(category_value) > 0 and len(category_value) <= 15):
+        messagebox.showerror("Category", "Category limit exceeded")
         return False
     if (dd<today1):
-        print("Deadline is gone.")#pop-up box to be added
+        messagebox.showwarning("Due date", "Deadline is gone!")
         return False
-
     return True
 
 
@@ -299,9 +300,6 @@ cal_events_btn=ttk.Button(mainframe, text='calendar with events', command=calend
 cal_events_btn.grid(column=1, row=8, sticky=(W, E))
 
 
-
-
-
 search_task = StringVar()
 search_task_widget = ttk.Entry(mainframe, width=20, textvariable=search_task)
 search_task_widget.grid(column=2, row=9, sticky=(W, E))
@@ -319,13 +317,15 @@ def show():
     tk.Label(search_result, text=textMsg, font=("Arial",27)).grid(row=0, columnspan=3)
     # create Treeview with 3 columns
     cols = ('Sr no.','Category', 'Task', 'Due date')
-    listBox = ttk.Treeview(search_result, columns=cols, show='headings')
+    tree_search = ttk.Treeview(search_result, columns=cols, show='headings')
+    for i in range(4):
+        tree_search.column(i, anchor="center")    
     # set column headings
     for col in cols:
-        listBox.heading(col, text=col)    
-    listBox.grid(row=1, column=0, columnspan=2)
+        tree_search.heading(col, text=col)    
+    tree_search.grid(row=1, column=0, columnspan=2)
     for i, (category,task_name,deadline) in enumerate(data, start=1):
-        listBox.insert("", "end", values=(i,category,task_name,deadline))
+        tree_search.insert("", "end", values=(i,category,task_name,deadline))
     tk.Button(search_result, text="Close", width=15, command=search_result.destroy).grid(row=4, column=1)
 
 
