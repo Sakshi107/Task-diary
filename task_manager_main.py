@@ -19,7 +19,7 @@ import db
 
 #Sign in to task-diary
 password_root = Tk()
-# password_root.geometry(("700x700+120+60"))
+# password_root.geometry("200x200+120+60")
 password_root.withdraw()
 password = simpledialog.askstring("Password", "Enter password:", show="*")
 password_root.destroy()
@@ -66,7 +66,7 @@ def notify():
 def email_notify(item):
     email = 'task.diary534@gmail.com'#add your gmail id from which u want to sent (only gmail account)
     password = 'task@diary'#add your email password
-    send_to_email = 'abc123@somaiya.edu'#add your email id where u want to sent (any mail account)
+    send_to_email = 'abcd10@gmail.com'#add your email id where u want to sent (any mail account)
     subject = 'Task Notifier'# The subject line
     message ='Category of task: '+item[3]+'\n\nYour Task:'+ item[1]
     msg = MIMEMultipart()
@@ -248,12 +248,13 @@ def change_theme():
     while(True):
         z=z%length
         root.set_theme(themes[z])
-        # cal.tag_config('reminder', background='red', foreground='yellow')
+        cal.tag_config('reminder', background='red', foreground='yellow')
+        top.destroy()       
         z+=1
         break
 
-changeTheme_button = ttk.Button(mainframe, text="Change Theme", command=change_theme)
-changeTheme_button.grid(column=1, row=7, sticky=(W, E))
+changeTheme_button = ttk.Button(mainframe, text="Change Theme",command=change_theme)
+changeTheme_button.grid(column=2, row=7, sticky=(W, E))
 
 
 
@@ -317,8 +318,8 @@ def calendar_events():
 # button.pack()
 # CreateToolTip(button, text = 'Hello you!\n'
 #                 'Have a nice day\n')    
-# cal_events_btn=ttk.Button(mainframe, text='calendar with events', command=calendar_events)
-# cal_events_btn.grid(column=1, row=8, sticky=(W, E))
+cal_events_btn=ttk.Button(mainframe, text='calendar with events', command=calendar_events)
+cal_events_btn.grid(column=1, row=7, sticky=(W, E))
 
 
 search_task = StringVar()
