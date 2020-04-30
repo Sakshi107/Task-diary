@@ -3,6 +3,7 @@ import psycopg2
 conn = None
 
 def initialize_db(password):
+    """Initialize db connection with provided user password."""
     print('Starting...')
     global conn
 
@@ -61,11 +62,13 @@ def create_table2():
         conn.close()
 
 def shutdown_db():
+    """Close connection to db."""
     print('Exit.')
     global conn
     conn.close()
 
 def add_task(values):
+    """Add specified task to the database.."""
     cursor = conn.cursor()
     cursor.execute("INSERT INTO tasks (task_name, priority_of_task, category, is_done,deadline) VALUES (%s, %s, %s, %s,%s) RETURNING id;",
                    (values[0], values[1], values[2], values[3],values[4]))
@@ -77,6 +80,7 @@ def add_task(values):
 
 
 def add_notify_date(values):
+    """Add specified task which is notified to user to the database."""
     cursor = conn.cursor()
     cursor.execute("INSERT INTO notification_tracker(id,notify_date) VALUES (%s, %s)",
                    (values[0], values[5]))
@@ -87,12 +91,22 @@ def add_notify_date(values):
     # return text
 
 def get_notified_tasks():
+    """Get all tasks which are already notified from the database."""
     cursor = conn.cursor()
     cursor.execute("SELECT id,notify_date from notification_tracker;")
     rows_count = cursor.fetchall()
     return rows_count   
 
+def tasks_to_notify():
+    """Get all tasks which are in notification_tracker table from the database."""
+    cursor = conn.cursor()
+    cursor.execute("SELECT category,task_name,priority_of_task,notify_date from tasks as t,notification_tracker as nt where t.id=nt.id and is_done='false' ")
+    rows_count = cursor.fetchall()
+    return rows_count 
+
+
 def get_tasks():
+    """Get all tasks from the database."""
     cursor = conn.cursor()
     cursor.execute("SELECT id, task_name, priority_of_task, category, is_done,deadline from tasks;")
     rows_count = cursor.fetchall()
@@ -100,6 +114,7 @@ def get_tasks():
 
 
 def edit_task(id, values):
+    """Edit specified task in the database."""
     cursor = conn.cursor()
     cursor.execute("UPDATE tasks SET task_name = %s, priority_of_task = %s, category = %s, is_done = %s ,deadline=%s WHERE id = %s;",
                    (values[0], values[1], values[2], values[3],values[4], id))
@@ -109,6 +124,7 @@ def edit_task(id, values):
 
 
 def delete_task(id):
+    """Delete specified task from the database."""
     cursor = conn.cursor()
     cursor.execute("DELETE from tasks where id = %s;", (id, ))
     conn.commit()

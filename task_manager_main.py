@@ -9,18 +9,17 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import date
 from dateutil.parser import parse
-
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
 import tkcalendar
 from tkcalendar import Calendar, DateEntry
 
 import db
 
-
+#Sign in to task-diary
 password_root = Tk()
+# password_root.geometry(("700x700+120+60"))
 password_root.withdraw()
 password = simpledialog.askstring("Password", "Enter password:", show="*")
 password_root.destroy()
@@ -31,10 +30,10 @@ if password is None:
 db.initialize_db(password)
 db.create_table()
 db.create_table2()
-
+tasks_due=[]
 
 root = ttkt.ThemedTk()
-root.set_theme('radiance')
+root.set_theme('keramik')# itft1 #smog
 root.title("Task Manager")
 columns = ("task_name", "priority_of_task", "category", "is_done","deadline")
 tree = ttk.Treeview(root, height=36, selectmode="browse", columns=columns, show="headings")
@@ -50,13 +49,15 @@ def already_notified(taskn):
     return False
 
 def notify():
+    #check the task date if its deadline is after 1 day, then notify user via email.
     for item in db.get_tasks():
+        #check that the task is not notfied already
         if not already_notified(item):
             dd=datetime.strptime(item[5], "%d-%m-%Y")
             dd2= dd -timedelta(days=1)
             dd3=dd2.strftime('%d-%m-%Y')
             today=datetime.today().strftime('%d-%m-%Y')
-            if (dd3==today) and (item[4]=="false"):
+            if (dd3==today) and (item[4]=="false"):   #check whether the task is not completed
                 email_notify(item)
                 db.add_notify_date(item)
                 print("Email notification sent sucessfully")
@@ -157,6 +158,7 @@ is_done_widget.grid(column=2, row=5, sticky=(W, E))
 notify()
 
 def create_task_item():
+    #get the task details 
     task_name_value = task_name.get()
     priority_of_task_value = priority_of_task.get()
     category_value = category.get()
@@ -194,25 +196,44 @@ def inputs_validation():
     priority_of_task_value = priority_of_task.get()
     category_value = category.get()
     deadline_value=deadline.get()
-    dd=datetime.strptime(deadline_value,"%d-%m-%Y")
+
     today=datetime.today().strftime('%d-%m-%Y')
     today1=datetime.strptime(today,"%d-%m-%Y")
 
+    try:
+        dd=datetime.strptime(deadline_value,"%d-%m-%Y")
+        isNotValidDate = False
+    except ValueError :
+        isNotValidDate = True 
+    
 
+    try:
+        if not(len(task_name_value) <=25):
+            messagebox.showerror("Task name", "Task name limit exceeded")
+            return False
+        if not(len(task_name_value) > 0 and len(task_name_value) <=25):
+            messagebox.showerror("Task name", "Task name cannot be null")
+            return False
+        
+        if not(int(priority_of_task_value) > 0 and int(priority_of_task_value) <= 10):
+            messagebox.showerror("Priority", "Priority is not valid")
+            return False
 
+        if not( len(category_value) <= 15):
+            messagebox.showerror("Category", "Category limit exceeded")
+            return False
 
-    if not(len(task_name_value) > 0 and len(task_name_value) <=25):
-        messagebox.showerror("Task name", "Task name limit exceeded")
+        if (isNotValidDate):
+            messagebox.showwarning("Due date", "Not valid date!")
+            return False
+
+        if (dd<today1):#deadline should be from today onwards
+            messagebox.showwarning("Due date", "Deadline is gone!")
+            return False  
+    except:
+        messagebox.showwarning("ADD TASK", "Not valid entry!")
         return False
-    if not(int(priority_of_task_value) > 0 and int(priority_of_task_value) <= 10):
-        messagebox.showerror("Priority", "Priority is not valid")
-        return False
-    if not(len(category_value) > 0 and len(category_value) <= 15):
-        messagebox.showerror("Category", "Category limit exceeded")
-        return False
-    if (dd<today1):
-        messagebox.showwarning("Due date", "Deadline is gone!")
-        return False
+          
     return True
 
 
@@ -227,7 +248,7 @@ def change_theme():
     while(True):
         z=z%length
         root.set_theme(themes[z])
-        cal.tag_config('reminder', background='red', foreground='yellow')
+        # cal.tag_config('reminder', background='red', foreground='yellow')
         z+=1
         break
 
@@ -296,8 +317,8 @@ def calendar_events():
 # button.pack()
 # CreateToolTip(button, text = 'Hello you!\n'
 #                 'Have a nice day\n')    
-cal_events_btn=ttk.Button(mainframe, text='calendar with events', command=calendar_events)
-cal_events_btn.grid(column=1, row=8, sticky=(W, E))
+# cal_events_btn=ttk.Button(mainframe, text='calendar with events', command=calendar_events)
+# cal_events_btn.grid(column=1, row=8, sticky=(W, E))
 
 
 search_task = StringVar()
@@ -332,6 +353,42 @@ def show():
 Search_btn=ttk.Button(mainframe, text='Search', command=show)
 Search_btn.grid(column=1, row=9, sticky=(W, E))
 
+
+def TaskDueTomorrow():
+    notifyTrack=db.tasks_to_notify()
+    tasks_due=[]
+    for item in notifyTrack:
+        dd=datetime.strptime(item[3], "%d-%m-%Y")
+        dd2= dd -timedelta(days=1)
+        dd3=dd2.strftime('%d-%m-%Y')
+        today=datetime.today().strftime('%d-%m-%Y')
+        if (dd3==today):
+            i=(item[0],item[1],item[2])
+            tasks_due.append(i)
+
+    tasks_due.sort(key=lambda e: e[1], reverse=True)
+    if(len(tasks_due)==0):
+       textMsg="No tasks due tomorrow"
+    else:
+        textMsg="Tasks due tomorrow"
+    tasks_due_result = tk.Toplevel(root)
+    tk.Label(tasks_due_result, text=textMsg, font=("Arial",27)).grid(row=0, columnspan=3)
+    # create Treeview with 3 columns
+    cols = ('Sr no.','Task', 'Category', 'Priority')
+    tree_search = ttk.Treeview(tasks_due_result, columns=cols, show='headings')
+    for i in range(4):
+        tree_search.column(i, anchor="center")    
+    # set column headings
+    for col in cols:
+        tree_search.heading(col, text=col)    
+    tree_search.grid(row=1, column=0, columnspan=2)
+    for i, (category,task_name,priority_of_task) in enumerate(tasks_due, start=1):
+        tree_search.insert("", "end", values=(i,category,task_name,priority_of_task))
+    tk.Button(tasks_due_result, text="Close", width=15, command=tasks_due_result.destroy).grid(row=4, column=1)
+
+
+TasksDue_btn=ttk.Button(mainframe, text='Tasks Due Tomorrow', command=TaskDueTomorrow)
+TasksDue_btn.grid(column=1, row=10, sticky=(W, E))
 
 
 
