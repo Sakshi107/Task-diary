@@ -11,14 +11,14 @@
 
 
 <br>
-## Description
+
 <h2 align='center'>Description</h2>
 <p align='center'>
 
 Task Diary is a desktop application that is kept by a user for the purpose of making records about tasks. 
 It is a task management system that enables user to ADD,DELETE,UPDATE,SEARCH,DISPLAY,NOTIFY and SORT the tasks according to category name,task name,due date and priority and have an overview of due dates in the form of calendar ,done using Tkinter and postgreSQL.
 </p>
-
+Document link:https://docs.google.com/document/d/13pVtgUSC7o03bKBDcg3bcGvAIQdTwMelTM2_UoI3obQ/edit?usp=sharing
 <!-- ------------------------------------------
 
 <div align="center">
