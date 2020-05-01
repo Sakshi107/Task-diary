@@ -19,7 +19,6 @@ import db
 
 #Sign in to task-diary
 password_root = Tk()
-# password_root.geometry("200x200+120+60")
 password_root.withdraw()
 password = simpledialog.askstring("Password", "Enter password:", show="*")
 password_root.destroy()
@@ -86,13 +85,12 @@ def email_notify(item):
 
 def treeview_sort_column(treeview, column, reverse):
     children_list = [(treeview.set(child, column), child) for child in treeview.get_children("")]
-    try:
+    if(column=="priority_of_task"):
         children_list.sort(key=lambda column:int(column[0]),reverse=reverse)
-    except:
-        try:
-            children_list.sort(key=lambda column:datetime.strptime(column[0],'%d-%m-%y'),reverse=reverse)
-        except:
-            children_list.sort(reverse=reverse)
+    elif(column=="deadline"):
+        children_list.sort(key=lambda column:datetime.strptime(column[0],'%d-%m-%Y'),reverse=reverse)
+    else:
+        children_list.sort(reverse=reverse)
     for index, (value, child) in enumerate(children_list):
         treeview.move(child, "", index)
 
@@ -214,8 +212,7 @@ def inputs_validation():
             return False
         if not(len(task_name_value) > 0 and len(task_name_value) <=25):
             messagebox.showerror("Task name", "Task name cannot be null")
-            return False
-        
+            return False        
         if not(int(priority_of_task_value) > 0 and int(priority_of_task_value) <= 10):
             messagebox.showerror("Priority", "Priority is not valid")
             return False
@@ -258,8 +255,6 @@ changeTheme_button = ttk.Button(mainframe, text="Change Theme",command=change_th
 changeTheme_button.grid(column=2, row=7, sticky=(W, E))
 
 
-
-
 top = tk.Toplevel(root)
 cal = Calendar(top, selectmode='none')  
 date = cal.datetime.today()
@@ -267,59 +262,16 @@ cal.calevent_create(date, 'Today', 'message')
 cal.pack(fill="both", expand=True)
 def calendar_events():  
     top = tk.Toplevel(root)
-    cal = Calendar(top, selectmode='none')  
+    cal = Calendar(top, selectmode='none') 
+    date = cal.datetime.today()
+    cal.calevent_create(date, 'Today', 'message') 
     for item in db.get_tasks():
         dd=datetime.strptime(item[5], "%d-%m-%Y")
         cal.calevent_create(dd,item[1], 'reminder')
         cal.tag_config('reminder', background='red', foreground='yellow')
         cal.pack(fill="both", expand=True)
-    date = cal.datetime.today()
-    cal.calevent_create(date, 'Today', 'message')
-
-# class ToolTip(object):
-
-#     def __init__(self, widget):
-#         self.widget = widget
-#         self.tipwindow = None
-#         self.id = None
-#         self.x = self.y = 0
-
-#     def showtip(self, text):
-#         "Display text in tooltip window"
-#         self.text = text
-#         if self.tipwindow or not self.text:
-#             return
-#         x, y, cx, cy = self.widget.bbox("insert")
-#         x = x + self.widget.winfo_rootx() + 57
-#         y = y + cy + self.widget.winfo_rooty() +27
-#         self.tipwindow = tw = Toplevel(self.widget)
-#         tw.wm_overrideredirect(1)
-#         tw.wm_geometry("+%d+%d" % (x, y))
-#         label = Label(tw, text=self.text, justify=LEFT,
-#                       background="#ffffe0", relief=SOLID, borderwidth=1,
-#                       font=("tahoma", "8", "normal"))
-#         label.pack(ipadx=1)
-
-#     def hidetip(self):
-#         tw = self.tipwindow
-#         self.tipwindow = None
-#         if tw:
-#             tw.destroy()
-
-# def CreateToolTip(widget, text):
-#     toolTip = ToolTip(widget)
-#     def enter(event):
-#         toolTip.showtip(text)
-#     def leave(event):
-#         toolTip.hidetip()
-#     widget.bind('<Enter>', enter)
-#     widget.bind('<Leave>', leave)
-
-# button = Button(top, text = 'Hover over me')
-# button.pack()
-# CreateToolTip(button, text = 'Hello you!\n'
-#                 'Have a nice day\n')    
-cal_events_btn=ttk.Button(mainframe, text='calendar with events', command=calendar_events)
+   
+cal_events_btn=ttk.Button(mainframe, text='Calendar with Due Dates', command=calendar_events)
 cal_events_btn.grid(column=1, row=7, sticky=(W, E))
 
 
@@ -327,10 +279,10 @@ search_task = StringVar()
 search_task_widget = ttk.Entry(mainframe, width=20, textvariable=search_task)
 search_task_widget.grid(column=2, row=9, sticky=(W, E))
 
-def show():
+def show_search_result():
     global data
     search_task_value= search_task.get()
-    data=db.read_from_db(search_task_value)
+    data=db.search_task(search_task_value)
     data.sort(key=lambda e: e[1], reverse=True)
     if(len(data)==0):
        textMsg="Search Result(Task not found)"
@@ -352,7 +304,7 @@ def show():
     tk.Button(search_result, text="Close", width=15, command=search_result.destroy).grid(row=4, column=1)
 
 
-Search_btn=ttk.Button(mainframe, text='Search', command=show)
+Search_btn=ttk.Button(mainframe, text='Search', command=show_search_result)
 Search_btn.grid(column=1, row=9, sticky=(W, E))
 
 

@@ -10,7 +10,7 @@ def initialize_db(password):
     try:
         conn = psycopg2.connect(database="task_manager",
                                 user="postgres",#username of postgreSQL
-                                password="password",#password of that user in postgreSQL
+                                password="Sakshi#123",#password of that user in postgreSQL
                                 host="127.0.0.1",
                                 port="5432")
 
@@ -32,7 +32,7 @@ def create_table():
         is_done text,
         deadline text
         )'''
-
+        cursor.execute(sql)
         conn.commit()
         print("Table Tasks loaded successfully........")
 
@@ -40,8 +40,6 @@ def create_table():
     except:
         print("Table Tasks is not loaded...")
         conn.close()
-
-
 
 def create_table2():
     global conn
@@ -130,7 +128,7 @@ def delete_task(id):
     conn.commit()
     print("Number of records deleted:", cursor.rowcount)
 
-def read_from_db(var):
+def search_task(var):
     cursor = conn.cursor()
     cursor.execute("SELECT category,task_name, deadline from tasks where task_name=%s OR category=%s OR deadline=%s;", (var,var,var ))
     rows = cursor.fetchall()
