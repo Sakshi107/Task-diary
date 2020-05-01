@@ -32,7 +32,7 @@ db.create_table2()
 tasks_due=[]
 
 root = ttkt.ThemedTk()
-root.set_theme('keramik')# itft1 #smog
+root.set_theme('radiance')
 root.title("Task Manager")
 columns = ("task_name", "priority_of_task", "category", "is_done","deadline")
 tree = ttk.Treeview(root, height=36, selectmode="browse", columns=columns, show="headings")
@@ -65,7 +65,7 @@ def notify():
 def email_notify(item):
     email = 'task.diary534@gmail.com'#add your gmail id from which u want to sent (only gmail account)
     password = 'task@diary'#add your email password
-    send_to_email = 'abcd10@gmail.com'#add your email id where u want to sent (any mail account)
+    send_to_email = 'task.diary534@gmail.com'#add your email id where u want to sent (any mail account)
     subject = 'Task Notifier'# The subject line
     message ='Category of task: '+item[3]+'\n\nYour Task:'+ item[1]
     msg = MIMEMultipart()
@@ -102,7 +102,7 @@ for column in columns:
 width, height = root.winfo_screenwidth(), root.winfo_screenheight()
 root.geometry("{0}x{1}+0+0".format(width, height))
 
-width_task_name = int(width * 0.25)
+width_task_name = int(width * 0.20)
 tree.column("task_name", width=width_task_name, anchor="center")
 tree.heading("task_name", text="Tasks")
 
@@ -325,7 +325,7 @@ def TaskDueToday_Tomorrow():
     if(len(tasks_due)==0):
        textMsg="No tasks due today/tomorrow"
     else:
-        textMsg="Tasks due tomorrow"
+        textMsg="Tasks due today/tomorrow"
     tasks_due_result = tk.Toplevel(root)
     tk.Label(tasks_due_result, text=textMsg, font=("Arial",27)).grid(row=0, columnspan=3)
     # create Treeview with 3 columns
@@ -373,6 +373,7 @@ def change_item():
 
         create_button["state"] = "normal"
         change_button["state"] = "disabled"
+        db.remove_item_notification_tracker(item_id)
         notify()
 
 change_button = ttk.Button(mainframe, text="Change Task", command=change_item)

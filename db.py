@@ -8,15 +8,19 @@ def initialize_db(password):
     global conn
 
     try:
-        conn = psycopg2.connect(database="task_manager",
+        conn = psycopg2.connect(database="task_manager",#default databse in postgreSQL
                                 user="postgres",#username of postgreSQL
                                 password="password",#password of that user in postgreSQL
                                 host="127.0.0.1",
                                 port="5432")
-
     except psycopg2.OperationalError as exception:
         print("PASSWORD IS INCORRECT. TRY AGAIN...")
         sys.exit()
+
+
+    # except psycopg2.OperationalError as exception:
+    #     print("PASSWORD IS INCORRECT. TRY AGAIN...")
+    #     sys.exit()
 
 def create_table():
     global conn
@@ -122,11 +126,19 @@ def edit_task(id, values):
 
 
 def delete_task(id):
-    """Delete specified task from the database."""
+    """Delete specified task from the tasks table of database."""
     cursor = conn.cursor()
     cursor.execute("DELETE from tasks where id = %s;", (id, ))
     conn.commit()
     print("Number of records deleted:", cursor.rowcount)
+
+def remove_item_notification_tracker(item_id):
+    """Delete specified task from the notification_tracker table of database."""
+    cursor = conn.cursor()
+    cursor.execute("DELETE from notification_tracker where id = %s;", (item_id, ))
+    conn.commit()
+    print("Number of records deleted:", cursor.rowcount)
+
 
 def search_task(var):
     cursor = conn.cursor()
