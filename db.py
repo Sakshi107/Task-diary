@@ -63,6 +63,29 @@ def create_table2():
         print("Table notification_tracker is not loaded...")
         conn.close()
 
+def create_table3():
+    global conn
+    try:
+        #Creating table notify_email if it not exists...
+        cursor = conn.cursor()
+        sql='''CREATE TABLE IF NOT EXISTS notification_email
+        (
+            id int GENERATED ALWAYS AS IDENTITY primary key,
+            from_email text,
+            password VARCHAR(30),
+            to_email text,
+            time text
+        ) '''
+        cursor.execute(sql)
+        conn.commit()
+        print("Table notification_email loaded successfully........")
+        #Closing the connection       
+    except:
+        print("Table notification_email is not loaded...")
+        conn.close()
+
+
+
 def shutdown_db():
     """Close connection to db."""
     print('Exit.')
@@ -80,6 +103,18 @@ def add_task(values):
     print("Task added successfully")
     return text
 
+def add_email(values):
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO notification_email (from_email,password,to_email,time) VALUES (%s,%s,%s,%s);",
+                   (values[0],values[1],values[2],values[3]))
+    conn.commit()
+    print("email added successfully")
+
+def get_email():
+    cursor = conn.cursor()
+    cursor.execute("SELECT from_email,password,to_email,time from notification_email ORDER BY time DESC LIMIT 1;")
+    rows_count = cursor.fetchall()
+    return rows_count
 
 def add_notify_date(values):
     """Add specified task which is notified to user to the database."""

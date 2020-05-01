@@ -63,9 +63,15 @@ def notify():
 
 
 def email_notify(item):
-    email = 'task.diary534@gmail.com'#add your gmail id from which u want to sent (only gmail account)
-    password = 'task@diary'#add your email password
-    send_to_email = 'task.diary534@gmail.com'#add your email id where u want to sent (any mail account)
+    row=db.get_email()
+    if(len(row)==0):
+        email ="task.diary534@gmail.com" #add your gmail id from which u want to sent (only gmail account)
+        password ="task@diary"#add your email password
+        send_to_email ="task.diary534@gmail.com"#add your email id where u want to sent (any mail account)
+    else:    
+        email = row[0][0]#add your gmail id from which u want to sent (only gmail account)
+        password = row[0][1]#add your email password
+        send_to_email = row[0][2]#add your email id where u want to sent (any mail account)
     subject = 'Task Notifier'# The subject line
     message ='Category of task: '+item[3]+'\n\nYour Task:'+ item[1]
     msg = MIMEMultipart()
@@ -306,6 +312,74 @@ def show_search_result():
 
 Search_btn=ttk.Button(mainframe, text='Search', command=show_search_result)
 Search_btn.grid(column=1, row=9, sticky=(W, E))
+
+
+from_email=StringVar()
+to_email = StringVar()
+password=StringVar()
+def Notify_email_func():
+    row=db.get_email()
+    print(row)
+    if(len(row)==0):
+        from_email.set("task.diary534@gmail.com")
+        password.set("task@diary")
+        to_email.set("task.diary534@gmail.com")
+    else:    
+        from_email.set(row[0][0])
+        password.set(row[0][1])
+        to_email.set(row[0][2])
+    global email_wd1
+    email_wd= tk.Toplevel(root)
+    email_wd.geometry("300x200")
+    email_wd1= ttk.Frame(email_wd, padding="25 25 100 50")
+    email_wd1.grid(row=0, column=2, sticky=(N, S, W, E))
+    email_wd1.rowconfigure(0, weight=1)
+    email_wd1.columnconfigure(0, weight=1)
+    tk.Label(email_wd1, text="Enter email details",bg="green",font=("Arial",17)).grid(row=0, columnspan=3)
+    ttk.Label(email_wd1, text="From email:").grid(column=1, row=1, sticky=(W, E))
+    ttk.Label(email_wd1, text="password:").grid(column=1, row=2, sticky=(W, E))
+    ttk.Label(email_wd1, text="To email:").grid(column=1, row=3, sticky=(W, E))
+    from_email_widget = ttk.Entry(email_wd1, width=20, textvariable=from_email)
+    from_email_widget.grid(column=2, row=1, sticky=(W, E))
+    password_widget = ttk.Entry(email_wd1, width=20, textvariable=password)
+    password_widget.grid(column=2, row=2, sticky=(W, E))
+    to_email_widget = ttk.Entry(email_wd1, width=20, textvariable=to_email)
+    to_email_widget.grid(column=2, row=3, sticky=(W, E))
+    
+
+    submit_btn=ttk.Button(email_wd1, text='Submit', command=submit_email)
+    submit_btn.grid(column=2, row=4, sticky=(W, E))
+
+def submit_email():
+    from_email_value = from_email.get()
+    password_value=password.get()
+    to_email_value = to_email.get()
+    item_values = (from_email_value,password_value,to_email_value,datetime.now())
+    db.add_email(item_values)
+    tk.Label(email_wd1,text="Email added Successfully",fg="green",font=("calibri",11)).grid(row=5, columnspan=3)
+    from_email.set("")
+    password.set("")
+    to_email.set("")
+        
+Notify_email_btn=ttk.Button(mainframe, text='Notify email', command=Notify_email_func)
+Notify_email_btn.grid(column=2, row=10, sticky=(W, E))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def TaskDueToday_Tomorrow():
