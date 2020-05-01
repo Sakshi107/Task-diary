@@ -84,18 +84,19 @@ def email_notify(item):
     server.sendmail(email, send_to_email, text)
     server.quit()
 
-
-
-
 def treeview_sort_column(treeview, column, reverse):
     children_list = [(treeview.set(child, column), child) for child in treeview.get_children("")]
-    children_list.sort(reverse=reverse)
-
+    try:
+        children_list.sort(key=lambda column:int(column[0]),reverse=reverse)
+    except:
+        try:
+            children_list.sort(key=lambda column:datetime.strptime(column[0],'%d-%m-%y'),reverse=reverse)
+        except:
+            children_list.sort(reverse=reverse)
     for index, (value, child) in enumerate(children_list):
         treeview.move(child, "", index)
 
     treeview.heading(column, command=lambda: treeview_sort_column(treeview, column, not reverse))
-
 
 for column in columns:
     tree.heading(column, text=column, command=lambda col=column: treeview_sort_column(tree, col, False))
