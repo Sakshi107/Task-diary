@@ -308,21 +308,22 @@ Search_btn=ttk.Button(mainframe, text='Search', command=show_search_result)
 Search_btn.grid(column=1, row=9, sticky=(W, E))
 
 
-def TaskDueTomorrow():
-    notifyTrack=db.tasks_to_notify()
+def TaskDueToday_Tomorrow():
+    notifyTrack=db.get_tasks()
     tasks_due=[]
     for item in notifyTrack:
-        dd=datetime.strptime(item[3], "%d-%m-%Y")
+        dd=datetime.strptime(item[5], "%d-%m-%Y")
         dd2= dd -timedelta(days=1)
         dd3=dd2.strftime('%d-%m-%Y')
+        dd_c=dd.strftime('%d-%m-%Y')
         today=datetime.today().strftime('%d-%m-%Y')
-        if (dd3==today):
-            i=(item[0],item[1],item[2])
+        if (dd3==today or dd_c==today):
+            i=(item[1],item[3],item[5])
             tasks_due.append(i)
 
     tasks_due.sort(key=lambda e: e[1], reverse=True)
     if(len(tasks_due)==0):
-       textMsg="No tasks due tomorrow"
+       textMsg="No tasks due today/tomorrow"
     else:
         textMsg="Tasks due tomorrow"
     tasks_due_result = tk.Toplevel(root)
@@ -341,7 +342,7 @@ def TaskDueTomorrow():
     tk.Button(tasks_due_result, text="Close", width=15, command=tasks_due_result.destroy).grid(row=4, column=1)
 
 
-TasksDue_btn=ttk.Button(mainframe, text='Tasks Due Tomorrow', command=TaskDueTomorrow)
+TasksDue_btn=ttk.Button(mainframe, text='Tasks Due Today/Tomorrow', command=TaskDueToday_Tomorrow)
 TasksDue_btn.grid(column=1, row=10, sticky=(W, E))
 
 

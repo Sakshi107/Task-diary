@@ -10,7 +10,7 @@ def initialize_db(password):
     try:
         conn = psycopg2.connect(database="task_manager",
                                 user="postgres",#username of postgreSQL
-                                password="Sakshi#123",#password of that user in postgreSQL
+                                password="password",#password of that user in postgreSQL
                                 host="127.0.0.1",
                                 port="5432")
 
