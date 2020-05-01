@@ -1,5 +1,6 @@
 import sys
 import psycopg2
+from tkinter import messagebox
 conn = None
 
 def initialize_db(password):
@@ -14,7 +15,7 @@ def initialize_db(password):
                                 host="127.0.0.1",
                                 port="5432")
     except psycopg2.OperationalError as exception:
-        print("PASSWORD IS INCORRECT. TRY AGAIN...")
+        messagebox.showerror("password","PASSWORD IS INCORRECT. TRY AGAIN...")
         sys.exit()
 
 
