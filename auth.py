@@ -68,18 +68,20 @@ def SignUp_user():
         messagebox.showerror('Username',"User already exists")
         SignUp_screen.destroy()
     else:
-        password_value = password.get()#input password if username doesn't already exists
-        length=len(password_value)# taking the length of password
-        if  length>=5 and length<=10:#To check all the conditions on the password are satisfied
-            t=(username_value,password_value)#create a tuple "t" containing name and password
-            db.add_user(t)# add to database
-            Label(SignUp_screen, text="Registration Success", fg="light steel blue", font=("Comic Sans MS", 11)).pack()
-            SignUp_screen.destroy()
-            
+        if(len(username_value)>=4 and len(username_value)<=10):
+            password_value = password.get()#input password if username doesn't already exists
+            length=len(password_value)# taking the length of password
+            if  length>=5 and length<=10:#To check all the conditions on the password are satisfied
+                t=(username_value,password_value)#create a tuple "t" containing name and password
+                db.add_user(t)# add to database
+                messagebox.showinfo('SignUp',"Registration successful!")
+                SignUp_screen.destroy()
+            else:
+                if(length<5 or length>10):
+                    messagebox.showerror('Password',"Your password should have 5-10 characters")
         else:
-           
-            if(length<8 or length>15):
-                messagebox.showerror('Password',"Your password should have 8-15 characters")
+            if(len(username_value)<4 or len(username_value)>10):
+                messagebox.showerror('Username',"Username should be 5-10 characters")
     # username_entry.delete(0, END)
     # password_entry.delete(0, END)
 
