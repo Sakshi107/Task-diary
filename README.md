@@ -43,6 +43,7 @@ Python3
 ```html
     pip install tkcalender
     pip install ttkthemes
+    pip install smtplib
 ```
 <!-- #### Changes to do in code:
 Add your PostgreSql password in db.py file in initialize_db function(for connecting to your PostgreSql)

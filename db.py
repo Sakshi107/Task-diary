@@ -9,7 +9,7 @@ def initialize_db(password):
     global conn
 
     try:
-        conn = psycopg2.connect(database="task_manager",#default databse in postgreSQL
+        conn = psycopg2.connect(database="postgres",#default databse in postgreSQL
                                 user="postgres",#username of postgreSQL
                                 password=password,#password of that user in postgreSQL
                                 host="127.0.0.1",
@@ -103,9 +103,9 @@ def create_table5():
         #Creating table user if it not exists...
         cursor = conn.cursor()
         sql='''CREATE TABLE IF NOT EXISTS users
-        # ( username text,
-        # password text ) ;
-        # '''
+        (username text,
+        password text ) ;
+        '''
         cursor.execute(sql)
         conn.commit()
         print("Table users loaded successfully........")
