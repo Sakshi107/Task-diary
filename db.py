@@ -9,7 +9,7 @@ def initialize_db(password):
     global conn
 
     try:
-        conn = psycopg2.connect(database="postgres",#default databse in postgreSQL
+        conn = psycopg2.connect(database="task_manager",#default databse in postgreSQL
                                 user="postgres",#username of postgreSQL
                                 password=password,#password of that user in postgreSQL
                                 host="127.0.0.1",
@@ -87,7 +87,8 @@ def create_table4():
         #Creating table theme if it not exists...
         cursor = conn.cursor()
         sql='''CREATE TABLE IF NOT EXISTS theme
-        ( theme_name text ) '''
+        ( theme_name text ) ;
+        '''
         cursor.execute(sql)
         conn.commit()
         print("Table theme loaded successfully........")
@@ -96,13 +97,44 @@ def create_table4():
         print("Table theme is not loaded...")
         conn.close()
 
-
+def create_table5():
+    global conn
+    try:
+        #Creating table user if it not exists...
+        cursor = conn.cursor()
+        sql='''CREATE TABLE IF NOT EXISTS users
+        # ( username text,
+        # password text ) ;
+        # '''
+        cursor.execute(sql)
+        conn.commit()
+        print("Table users loaded successfully........")
+        #Closing the con
+    except:
+        print("Table users is not loaded...")
+        conn.close()
 
 def shutdown_db():
     """Close connection to db."""
     print('Exit.')
     global conn
     conn.close()
+
+
+def add_user(values):
+    cursor = conn.cursor()
+    print(values[0])
+    print(values[1])
+    cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s);",
+                   (values[0], values[1]))
+    conn.commit()
+    print("User added successfully")
+
+def get_users():
+    cursor = conn.cursor()
+    cursor.execute("SELECT username,password from users;")
+    rows_count = cursor.fetchall()
+    return rows_count
 
 
 
