@@ -26,15 +26,25 @@ password_root.destroy()
 if password is None:
     sys.exit()
 
+#Load tables
 db.initialize_db(password)
 db.create_table()
 db.create_table2()
+db.create_table3()
+db.create_table4()
 tasks_due=[]
 
-root = ttkt.ThemedTk()
-root.set_theme('radiance')
+root = ttkt.ThemedTk()     #Main window
+tname=db.get_theme()
+if len(tname)==0 :         #If youare opening for the first time default theme will be appear.
+    root.set_theme('radiance')
+else:                       #else the theme last you change will be appear.
+    root.set_theme(tname[0][0])
+
+
 root.title("Task Manager")
 columns = ("task_name", "priority_of_task", "category", "is_done","deadline")
+#Table for the task
 tree = ttk.Treeview(root, height=36, selectmode="browse", columns=columns, show="headings")
 scrollbar = ttk.Scrollbar(root, orient=VERTICAL, command=tree.yview)
 tree.configure(yscrollcommand=scrollbar.set)
@@ -81,7 +91,6 @@ def email_notify(item):
 
     # Attach the message to the MIMEMultipart object
     msg.attach(MIMEText(message, 'plain'))
-
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
     server.login(email, password)
@@ -160,7 +169,7 @@ is_done_widget = ttk.Checkbutton(mainframe, variable=is_done,
 is_done_widget.grid(column=2, row=5, sticky=(W, E))
 
 
-notify()
+
 
 def create_task_item():
     #get the task details 
@@ -253,6 +262,8 @@ def change_theme():
         z=z%length
         root.set_theme(themes[z])
         cal.tag_config('reminder', background='red', foreground='yellow')
+        db.delete_theme()
+        db.add_theme(themes[z])
         top.destroy()       
         z+=1
         break
@@ -295,7 +306,7 @@ def show_search_result():
     else:
         textMsg="Search Result"
     search_result = tk.Toplevel(root)
-    tk.Label(search_result, text=textMsg, font=("Arial",27)).grid(row=0, columnspan=3)
+    tk.Label(search_result, text=textMsg,bg="light steel blue" ,font=("Comic Sans MS",27)).grid(row=0, columnspan=3)
     # create Treeview with 3 columns
     cols = ('Sr no.','Category', 'Task', 'Due date')
     tree_search = ttk.Treeview(search_result, columns=cols, show='headings')
@@ -335,20 +346,19 @@ def Notify_email_func():
     email_wd1.grid(row=0, column=2, sticky=(N, S, W, E))
     email_wd1.rowconfigure(0, weight=1)
     email_wd1.columnconfigure(0, weight=1)
-    tk.Label(email_wd1, text="Enter email details",bg="green",font=("Arial",17)).grid(row=0, columnspan=3)
-    ttk.Label(email_wd1, text="From email:").grid(column=1, row=1, sticky=(W, E))
-    ttk.Label(email_wd1, text="password:").grid(column=1, row=2, sticky=(W, E))
-    ttk.Label(email_wd1, text="To email:").grid(column=1, row=3, sticky=(W, E))
+    tk.Label(email_wd1, text="Enter email details",bg="light steel blue",font=("Comic Sans MS",17)).grid(row=0, columnspan=3)
+    ttk.Label(email_wd1, text="From email:").grid(column=1, row=2, sticky=(W, E))
+    ttk.Label(email_wd1, text="password:").grid(column=1, row=3, sticky=(W, E))
+    ttk.Label(email_wd1, text="To email:").grid(column=1, row=4, sticky=(W, E))
     from_email_widget = ttk.Entry(email_wd1, width=20, textvariable=from_email)
-    from_email_widget.grid(column=2, row=1, sticky=(W, E))
+    from_email_widget.grid(column=2, row=2, sticky=(W, E))
     password_widget = ttk.Entry(email_wd1, width=20, textvariable=password)
-    password_widget.grid(column=2, row=2, sticky=(W, E))
+    password_widget.grid(column=2, row=3, sticky=(W, E))
     to_email_widget = ttk.Entry(email_wd1, width=20, textvariable=to_email)
-    to_email_widget.grid(column=2, row=3, sticky=(W, E))
-    
+    to_email_widget.grid(column=2, row=4, sticky=(W, E))
 
     submit_btn=ttk.Button(email_wd1, text='Submit', command=submit_email)
-    submit_btn.grid(column=2, row=4, sticky=(W, E))
+    submit_btn.grid(column=2, row=5, sticky=(W, E))
 
 def submit_email():
     from_email_value = from_email.get()
@@ -361,24 +371,8 @@ def submit_email():
     password.set("")
     to_email.set("")
         
-Notify_email_btn=ttk.Button(mainframe, text='Notify email', command=Notify_email_func)
+Notify_email_btn=ttk.Button(mainframe, text='Change email', command=Notify_email_func)
 Notify_email_btn.grid(column=2, row=10, sticky=(W, E))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -392,7 +386,7 @@ def TaskDueToday_Tomorrow():
         dd_c=dd.strftime('%d-%m-%Y')
         today=datetime.today().strftime('%d-%m-%Y')
         if (dd3==today or dd_c==today):
-            i=(item[1],item[3],item[5])
+            i=(item[1],item[3],item[2],item[5])
             tasks_due.append(i)
 
     tasks_due.sort(key=lambda e: e[1], reverse=True)
@@ -401,18 +395,18 @@ def TaskDueToday_Tomorrow():
     else:
         textMsg="Tasks due today/tomorrow"
     tasks_due_result = tk.Toplevel(root)
-    tk.Label(tasks_due_result, text=textMsg, font=("Arial",27)).grid(row=0, columnspan=3)
-    # create Treeview with 3 columns
-    cols = ('Sr no.','Task', 'Category', 'Priority')
+    tk.Label(tasks_due_result, text=textMsg ,bg="light steel blue",font=("Comic Sans MS",27)).grid(row=0, columnspan=3)
+    # create Treeview with 5 columns
+    cols = ('Sr no.','Task', 'Category', 'Priority','Due on')
     tree_search = ttk.Treeview(tasks_due_result, columns=cols, show='headings')
-    for i in range(4):
+    for i in range(5):
         tree_search.column(i, anchor="center")    
     # set column headings
     for col in cols:
         tree_search.heading(col, text=col)    
     tree_search.grid(row=1, column=0, columnspan=2)
-    for i, (category,task_name,priority_of_task) in enumerate(tasks_due, start=1):
-        tree_search.insert("", "end", values=(i,category,task_name,priority_of_task))
+    for i, (task_name,category,priority_of_task,deadline) in enumerate(tasks_due, start=1):
+        tree_search.insert("", "end", values=(i,task_name,category,priority_of_task,deadline))
     tk.Button(tasks_due_result, text="Close", width=15, command=tasks_due_result.destroy).grid(row=4, column=1)
 
 
@@ -514,7 +508,7 @@ def left_click_handler(event):
 
 
 tree.bind("<1>", left_click_handler)
-
+notify()
 
 def shutdown_hook():
     if messagebox.askyesno(message="Are you sure you want to quit?",

@@ -9,19 +9,15 @@ def initialize_db(password):
     global conn
 
     try:
-        conn = psycopg2.connect(database="task_manager",#default databse in postgreSQL
+        conn = psycopg2.connect(database="postgres",#default databse in postgreSQL
                                 user="postgres",#username of postgreSQL
-                                password="password",#password of that user in postgreSQL
+                                password=password,#password of that user in postgreSQL
                                 host="127.0.0.1",
                                 port="5432")
     except psycopg2.OperationalError as exception:
         messagebox.showerror("password","PASSWORD IS INCORRECT. TRY AGAIN...")
         sys.exit()
 
-
-    # except psycopg2.OperationalError as exception:
-    #     print("PASSWORD IS INCORRECT. TRY AGAIN...")
-    #     sys.exit()
 
 def create_table():
     global conn
@@ -85,6 +81,21 @@ def create_table3():
         print("Table notification_email is not loaded...")
         conn.close()
 
+def create_table4():
+    global conn
+    try:
+        #Creating table theme if it not exists...
+        cursor = conn.cursor()
+        sql='''CREATE TABLE IF NOT EXISTS theme
+        ( theme_name text ) '''
+        cursor.execute(sql)
+        conn.commit()
+        print("Table theme loaded successfully........")
+        #Closing the connection       
+    except:
+        print("Table theme is not loaded...")
+        conn.close()
+
 
 
 def shutdown_db():
@@ -93,8 +104,10 @@ def shutdown_db():
     global conn
     conn.close()
 
+
+
 def add_task(values):
-    """Add specified task to the database.."""
+    """Add specified task to task table"""
     cursor = conn.cursor()
     cursor.execute("INSERT INTO tasks (task_name, priority_of_task, category, is_done,deadline) VALUES (%s, %s, %s, %s,%s) RETURNING id;",
                    (values[0], values[1], values[2], values[3],values[4]))
@@ -103,6 +116,39 @@ def add_task(values):
     conn.commit()
     print("Task added successfully")
     return text
+
+def get_tasks():
+    """Get all tasks from the task table."""
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, task_name, priority_of_task, category, is_done,deadline from tasks;")
+    rows_count = cursor.fetchall()
+    return rows_count
+
+def edit_task(id, values):
+    """Edit specified task in the task table."""
+    cursor = conn.cursor()
+    cursor.execute("UPDATE tasks SET task_name = %s, priority_of_task = %s, category = %s, is_done = %s ,deadline=%s WHERE id = %s;",
+                   (values[0], values[1], values[2], values[3],values[4], id))
+
+    conn.commit()
+    print("Number of records updated:", cursor.rowcount)
+
+def delete_task(id):
+    """Delete specified task from the tasks table."""
+    cursor = conn.cursor()
+    cursor.execute("DELETE from tasks where id = %s;", (id, ))
+    conn.commit()
+    print("Number of records deleted:", cursor.rowcount)
+
+def search_task(var):
+    """Search specified task by its name/category/deadline from the tasks table """
+    cursor = conn.cursor()
+    cursor.execute("SELECT category,task_name, deadline from tasks where task_name=%s OR category=%s OR deadline=%s;", (var,var,var ))
+    rows = cursor.fetchall()
+    return rows
+
+
+
 
 def add_email(values):
     cursor = conn.cursor()
@@ -116,6 +162,32 @@ def get_email():
     cursor.execute("SELECT from_email,password,to_email,time from notification_email ORDER BY time DESC LIMIT 1;")
     rows_count = cursor.fetchall()
     return rows_count
+
+
+
+def add_theme(name):
+    """Add current theme name to theme table."""
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO theme(theme_name) VALUES (%s);",
+                   (name,))
+    conn.commit()
+    print("Theme saved.")
+
+def delete_theme():
+    """Delete theme from the theme table. """
+    cursor = conn.cursor()
+    cursor.execute("DELETE from theme ")
+    conn.commit()
+    print("Number of records deleted:", cursor.rowcount)
+
+def get_theme():
+    cursor = conn.cursor()
+    cursor.execute("SELECT * from theme;")
+    rows_count = cursor.fetchall()
+    return rows_count
+
+
+
 
 def add_notify_date(values):
     """Add specified task which is notified to user to the database."""
@@ -142,32 +214,6 @@ def tasks_to_notify():
     rows_count = cursor.fetchall()
     return rows_count 
 
-
-def get_tasks():
-    """Get all tasks from the database."""
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, task_name, priority_of_task, category, is_done,deadline from tasks;")
-    rows_count = cursor.fetchall()
-    return rows_count
-
-
-def edit_task(id, values):
-    """Edit specified task in the database."""
-    cursor = conn.cursor()
-    cursor.execute("UPDATE tasks SET task_name = %s, priority_of_task = %s, category = %s, is_done = %s ,deadline=%s WHERE id = %s;",
-                   (values[0], values[1], values[2], values[3],values[4], id))
-
-    conn.commit()
-    print("Number of records updated:", cursor.rowcount)
-
-
-def delete_task(id):
-    """Delete specified task from the tasks table of database."""
-    cursor = conn.cursor()
-    cursor.execute("DELETE from tasks where id = %s;", (id, ))
-    conn.commit()
-    print("Number of records deleted:", cursor.rowcount)
-
 def remove_item_notification_tracker(item_id):
     """Delete specified task from the notification_tracker table of database."""
     cursor = conn.cursor()
@@ -176,8 +222,3 @@ def remove_item_notification_tracker(item_id):
     print("Number of records deleted:", cursor.rowcount)
 
 
-def search_task(var):
-    cursor = conn.cursor()
-    cursor.execute("SELECT category,task_name, deadline from tasks where task_name=%s OR category=%s OR deadline=%s;", (var,var,var ))
-    rows = cursor.fetchall()
-    return rows
