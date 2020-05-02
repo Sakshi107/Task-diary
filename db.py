@@ -31,7 +31,8 @@ def create_table():
         priority_of_task text,
         category text,
         is_done text,
-        deadline text
+        deadline text,
+        username text
         )'''
         cursor.execute(sql)
         conn.commit()
@@ -50,7 +51,8 @@ def create_table2():
         sql='''CREATE TABLE IF NOT EXISTS notification_tracker
         (
             id int,
-            notify_date text
+            notify_date text,
+            username text
         ) '''
         cursor.execute(sql)
         conn.commit()
@@ -71,7 +73,8 @@ def create_table3():
             from_email text,
             password VARCHAR(30),
             to_email text,
-            time text
+            time text,
+            username text
         ) '''
         cursor.execute(sql)
         conn.commit()
@@ -87,7 +90,8 @@ def create_table4():
         #Creating table theme if it not exists...
         cursor = conn.cursor()
         sql='''CREATE TABLE IF NOT EXISTS theme
-        ( theme_name text ) ;
+        ( theme_name text,
+        username text ) ;
         '''
         cursor.execute(sql)
         conn.commit()
@@ -138,21 +142,21 @@ def get_users():
 
 
 
-def add_task(values):
+def add_task(values,username):
     """Add specified task to task table"""
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO tasks (task_name, priority_of_task, category, is_done,deadline) VALUES (%s, %s, %s, %s,%s) RETURNING id;",
-                   (values[0], values[1], values[2], values[3],values[4]))
+    cursor.execute("INSERT INTO tasks (task_name, priority_of_task, category, is_done,deadline,username) VALUES (%s, %s, %s, %s,%s,%s) RETURNING id;",
+                   (values[0], values[1], values[2], values[3],values[4],username))
 
     text = cursor.fetchone()[0]
     conn.commit()
     print("Task added successfully")
     return text
 
-def get_tasks():
+def get_tasks(username):
     """Get all tasks from the task table."""
     cursor = conn.cursor()
-    cursor.execute("SELECT id, task_name, priority_of_task, category, is_done,deadline from tasks;")
+    cursor.execute("SELECT id, task_name, priority_of_task, category, is_done,deadline from tasks where username=%s;",(username,))
     rows_count = cursor.fetchall()
     return rows_count
 
@@ -172,79 +176,73 @@ def delete_task(id):
     conn.commit()
     print("Number of records deleted:", cursor.rowcount)
 
-def search_task(var):
+def search_task(var,username):
     """Search specified task by its name/category/deadline from the tasks table """
     cursor = conn.cursor()
-    cursor.execute("SELECT category,task_name, deadline from tasks where task_name=%s OR category=%s OR deadline=%s;", (var,var,var ))
+    cursor.execute("SELECT category,task_name, deadline from tasks where (task_name=%s OR category=%s OR deadline=%s) AND username=%s;", (var,var,var,username))
     rows = cursor.fetchall()
     return rows
 
 
 
 
-def add_email(values):
+def add_email(values,username):
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO notification_email (from_email,password,to_email,time) VALUES (%s,%s,%s,%s);",
-                   (values[0],values[1],values[2],values[3]))
+    cursor.execute("INSERT INTO notification_email (from_email,password,to_email,time,username) VALUES (%s,%s,%s,%s,%s);",
+                   (values[0],values[1],values[2],values[3],username))
     conn.commit()
     print("email added successfully")
 
-def get_email():
+def get_email(username):
     cursor = conn.cursor()
-    cursor.execute("SELECT from_email,password,to_email,time from notification_email ORDER BY time DESC LIMIT 1;")
+    cursor.execute("SELECT from_email,password,to_email,time from notification_email where username=%s ORDER BY time DESC LIMIT 1;",(username,))
     rows_count = cursor.fetchall()
     return rows_count
 
 
 
-def add_theme(name):
+def add_theme(themename,username):
     """Add current theme name to theme table."""
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO theme(theme_name) VALUES (%s);",
-                   (name,))
+    cursor.execute("INSERT INTO theme(theme_name,username) VALUES (%s,%s);",
+                   (themename,username))
     conn.commit()
     print("Theme saved.")
 
-def delete_theme():
+def delete_theme(username):
     """Delete theme from the theme table. """
     cursor = conn.cursor()
-    cursor.execute("DELETE from theme ")
+    cursor.execute("DELETE from theme where username=%s",(username,))
     conn.commit()
     print("Number of records deleted:", cursor.rowcount)
 
-def get_theme():
+def get_theme(username):
     cursor = conn.cursor()
-    cursor.execute("SELECT * from theme;")
+    cursor.execute("SELECT theme_name from theme where username=%s;",(username,))
     rows_count = cursor.fetchall()
     return rows_count
 
 
 
 
-def add_notify_date(values):
+def add_notify_date(values,username):
     """Add specified task which is notified to user to the database."""
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO notification_tracker(id,notify_date) VALUES (%s, %s)",
-                   (values[0], values[5]))
+    cursor.execute("INSERT INTO notification_tracker(id,notify_date,username) VALUES (%s, %s,%s)",
+                   (values[0], values[5],username))
 
     # text = cursor.fetchone()[0]
     conn.commit()
     print("Notifier date added to notification_tracker table")
     # return text
 
-def get_notified_tasks():
+def get_notified_tasks(username):
     """Get all tasks which are already notified from the database."""
     cursor = conn.cursor()
-    cursor.execute("SELECT id,notify_date from notification_tracker;")
+    cursor.execute("SELECT id,notify_date from notification_tracker where username=%s;",(username,))
     rows_count = cursor.fetchall()
     return rows_count   
 
-def tasks_to_notify():
-    """Get all tasks which are in notification_tracker table from the database."""
-    cursor = conn.cursor()
-    cursor.execute("SELECT category,task_name,priority_of_task,notify_date from tasks as t,notification_tracker as nt where t.id=nt.id and is_done='false' ")
-    rows_count = cursor.fetchall()
-    return rows_count 
 
 def remove_item_notification_tracker(item_id):
     """Delete specified task from the notification_tracker table of database."""
