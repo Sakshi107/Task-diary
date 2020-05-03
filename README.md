@@ -35,9 +35,11 @@ Document link
 ------------------------------------------
 ## Demo ##
 Sign In
+
 ![Demo Sign In](gallery/TD_SignIn.gif)
 
 Task Diary
+
 ![Demo Task Diary](gallery/Task_Diary.gif)
 ## How To Use
 #### Software Requirements
