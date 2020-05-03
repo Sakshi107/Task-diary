@@ -31,7 +31,7 @@ Document link
 - Can browse the task 
 - Get email,desktop notification
 - Overview of due dates in the form of calendar
-
+- Can Change theme
 ------------------------------------------
 ## Demo ##
 Sign In
@@ -61,11 +61,11 @@ Install the dependencies by running:
 ```html
     python start.py
 ```
-For getting email notification of task:
-<p>
-Allow less secure app access by clicking:<a href="
-https://myaccount.google.com/lesssecureapps">Turn On</a>
-</p>
+#### For getting email notification of task:
+
+Allow less secure app access by clicking on Turn On :
+https://myaccount.google.com/lesssecureapps 
+
 
 ---
 ###             Tech stack
