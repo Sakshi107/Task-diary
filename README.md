@@ -13,7 +13,7 @@
 
 ## Description ##
 
-Task Diary is a desktop appl that enables user to keep all tasks in one application.User can filter the tasks and get notification of tasks.
+Task Diary is a desktop application that enables user to keep all tasks in one application.User can filter the tasks and get notification of tasks.
 <p>
 For more details-
 <a href="https://docs.google.com/document/d/13pVtgUSC7o03bKBDcg3bcGvAIQdTwMelTM2_UoI3obQ/edit?usp=sharing">
