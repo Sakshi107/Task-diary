@@ -9,30 +9,36 @@
 [![](https://img.shields.io/badge/Made_with-Python3-blue?style=for-the-badge&logo=python)](https://www.python.org "Python3")
 [![](https://img.shields.io/badge/Made_with-Postgresql-red?style=for-the-badge&logo=Postgresql)](https://www.postgresql.org/)
 
-
-<br>
-
-<h2 align='center'>Description</h2>
-<p align='center'>
-
-Task Diary is a desktop application that is kept by a user for the purpose of making records about tasks. 
-It is a task management system that enables user to signIn/signUp and ADD,DELETE,UPDATE,SEARCH,DISPLAY,NOTIFY and SORT the tasks according to category name,task name,due date and priority and have an overview of due dates in the form of calendar ,done using Tkinter and postgreSQL.
 </p>
-Document link:https://docs.google.com/document/d/13pVtgUSC7o03bKBDcg3bcGvAIQdTwMelTM2_UoI3obQ/edit?usp=sharing
-<!-- ------------------------------------------
 
-<div align="center">
-<h3 align="center"> Task Diary Desktop App</h3>
-<br>
-<p align="center">
-  <img src ="./assets/website.gif" width = 500px>
+## Description ##
+
+Task Diary is a desktop appl that enables user to keep all tasks in one application.User can filter the tasks and get notification of tasks.
+<p>
+For more details-
+<a href="https://docs.google.com/document/d/13pVtgUSC7o03bKBDcg3bcGvAIQdTwMelTM2_UoI3obQ/edit?usp=sharing">
+Document link 
+</a>
 </p>
-<br>
-</div> -->
 
 ------------------------------------------
+## Features ##
 
+- User Sign In and Sign Up
+- Display tasks
+- Can add task,update task,delete task 
+- Sort the tasks according to it's category,task name,due date and priority
+- Can browse the task 
+- Get email,desktop notification
+- Overview of due dates in the form of calendar
 
+------------------------------------------
+## Demo ##
+Sign In
+![Demo Sign In](gallery/TD_SignIn.gif)
+
+Task Diary
+![Demo Task Diary](gallery/Task_Diary.gif)
 ## How To Use
 #### Software Requirements
 
@@ -40,20 +46,24 @@ PostgreSql<br>
 Python3
 
 #### Installation
-```html
+Install the dependencies by running:
+ <!-- pip install -r requirements.txt -->
+```html  
     pip install tkcalender
     pip install ttkthemes
     pip install smtplib
 ```
-<!-- #### Changes to do in code:
-Add your PostgreSql password in db.py file in initialize_db function(for connecting to your PostgreSql)
-Add your -->
+
 #### Run using Command Prompt
 
 ```html
     python start.py
 ```
-
+For getting email notification of task:
+<p>
+Allow less secure app access by clicking:<a href="
+https://myaccount.google.com/lesssecureapps">Turn On</a>
+</p>
 
 ---
 ###             Tech stack
@@ -64,10 +74,4 @@ Add your -->
 
 ------------------------------------------
 
-### Contributors
-
-- [@Sakshi Shelar](https://github.com/Sakshi107)
-- [@Hiral Sheth](https://github.com/hiral72)
-
-------------------------------------------
 <h3 align="center"><b>Developed with :heart: by <a href="https://github.com/hiral72">Hiral</a> and <a href="https://github.com/Sakshi107">Sakshi</a></b></h1>
